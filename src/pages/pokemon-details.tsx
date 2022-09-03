@@ -29,7 +29,7 @@ import ErrorSnackbar from "../components/error-snackbar/error-snackbar";
 type PokemonDetailsFormFields = {
   hp: number;
   name: string;
-  attack: { damage: string }[];
+  attack: { damage: number }[];
 };
 
 const StyledTextField = styled(TextField)(() => ({
@@ -69,7 +69,7 @@ const PokemonDetails: FC = () => {
           name: pokemonDetails.name,
           attacks: card?.attacks?.map((att, idx) => ({
             ...att,
-            damage: pokemonDetails.attack[idx].damage,
+            damage: pokemonDetails.attack[idx].damage.toString(),
           })),
         })
       );
@@ -90,7 +90,7 @@ const PokemonDetails: FC = () => {
           setCard(card);
           reset({ hp: Number(card.hp), name: card.name });
           card.attacks?.forEach((attack) => {
-            append({ damage: attack.damage });
+            append({ damage: parseInt(attack.damage) });
           });
         })
         .catch((error) => {
@@ -102,7 +102,9 @@ const PokemonDetails: FC = () => {
 
   if (card == null) {
     return (
-      <Typography variant="caption">Ooops... Something went wrong.</Typography>
+      <Grid container justifyContent="center" marginTop="24px">
+        <Typography variant="h4">Ooops... Something went wrong :(</Typography>
+      </Grid>
     );
   }
 

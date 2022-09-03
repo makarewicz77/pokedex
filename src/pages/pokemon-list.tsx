@@ -105,6 +105,9 @@ const PokemonList: FC<PokemonListProps> = () => {
       <ErrorSnackbar
         open={errorSnackbarState.open}
         message={errorSnackbarState.message}
+        onClose={() => {
+          setErrorSnackbarState({ open: false, message: "" });
+        }}
       />
     </Grid>
   );
