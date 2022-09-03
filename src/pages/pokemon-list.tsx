@@ -6,6 +6,7 @@ import {
   Pagination,
   Snackbar,
   TablePagination,
+  Typography,
 } from "@mui/material";
 import React, { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -31,7 +32,12 @@ const PokemonList: FC<PokemonListProps> = () => {
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    getCards({ page: currentPage, pageSize, orderBy: "name" })
+    getCards({
+      page: currentPage,
+      pageSize,
+      orderBy: "name",
+      q: "supertype:Pokémon",
+    })
       .then(({ cards, totalCount }) => {
         setCards(cards);
         setTotalCount(totalCount);
@@ -45,7 +51,9 @@ const PokemonList: FC<PokemonListProps> = () => {
   return (
     <Grid container>
       <Grid container justifyContent="center">
-        <h1>Pokemon List</h1>
+        <Typography variant="h3" margin="24px 0">
+          Pokemon List
+        </Typography>
       </Grid>
       <Grid
         container
@@ -90,7 +98,7 @@ const PokemonList: FC<PokemonListProps> = () => {
         <TablePagination
           component="div"
           count={totalCount}
-          page={cards.length > 0 ? currentPage : 0}
+          page={currentPage - 1}
           onPageChange={(e, newPage) => setCurrentPage(newPage)}
           rowsPerPage={pageSize}
           onRowsPerPageChange={(e) => {
