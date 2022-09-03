@@ -11,6 +11,14 @@ import React, { FC, useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { Card, getCard } from "../api/api-client";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import {
+  addPokemonToBattle,
+  clearBattlePokemons,
+  clearError,
+  selectBattlePokemons,
+} from "../features/pokemon-battle-cards";
+import ErrorSnackbar from "../components/error-snackbar/error-snackbar";
 
 /**
  * PokemonDetails component gets the cardId from the url params
@@ -21,7 +29,7 @@ import { Card, getCard } from "../api/api-client";
 type PokemonDetailsFormFields = {
   hp: number;
   name: string;
-  attack: { [key: string]: string }[];
+  attack: { damage: string }[];
 };
 
 const StyledTextField = styled(TextField)(() => ({
@@ -33,7 +41,11 @@ const PokemonDetails: FC = () => {
   const { cardId } = useParams();
   const [card, setCard] = useState<Card | null>(null);
 
-  // form hook and functions
+  // redux
+  const { error } = useAppSelector(selectBattlePokemons);
+  const dispatch = useAppDispatch();
+
+  // form hooks and functions
   const { handleSubmit, watch, setValue, reset, control, register } =
     useForm<PokemonDetailsFormFields>({
       defaultValues: {
@@ -49,8 +61,27 @@ const PokemonDetails: FC = () => {
   const handlePokemonDetailsSave = (
     pokemonDetails: PokemonDetailsFormFields
   ) => {
-    console.log({ pokemonDetails });
+    if (card != null) {
+      dispatch(
+        addPokemonToBattle({
+          ...card,
+          hp: pokemonDetails.hp.toString(),
+          name: pokemonDetails.name,
+          attacks: card?.attacks?.map((att, idx) => ({
+            ...att,
+            damage: pokemonDetails.attack[idx].damage,
+          })),
+        })
+      );
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearBattlePokemons());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (cardId != null && cardId.length > 0) {
@@ -59,7 +90,7 @@ const PokemonDetails: FC = () => {
           setCard(card);
           reset({ hp: Number(card.hp), name: card.name });
           card.attacks?.forEach((attack) => {
-            append({ [attack.name]: attack.damage });
+            append({ damage: attack.damage });
           });
         })
         .catch((error) => {
@@ -158,14 +189,16 @@ const PokemonDetails: FC = () => {
                       marginTop="12px"
                     >
                       <TextField
+                        disabled={
+                          card.attacks?.[index].damage === "" ||
+                          card.attacks?.[index].damage == null
+                        }
                         label="Damage"
                         InputLabelProps={{ shrink: true }}
                         inputMode="numeric"
                         type="number"
                         fullWidth
-                        {...register(
-                          `attack.${index}.${card.attacks?.[index].name}`
-                        )}
+                        {...register(`attack.${index}.damage`)}
                       />
                     </Grid>
                   </Grid>
@@ -180,11 +213,18 @@ const PokemonDetails: FC = () => {
               variant="contained"
               style={{ margin: "24px 0 0" }}
             >
-              Save new statistics
+              Add {card.name} to battle!
             </Button>
           </Grid>
         </form>
       </Paper>
+      <ErrorSnackbar
+        open={error}
+        message={"Cannot add more than 2 pokemons to battle!"}
+        onClose={() => {
+          dispatch(clearError());
+        }}
+      />
     </Grid>
   );
 };

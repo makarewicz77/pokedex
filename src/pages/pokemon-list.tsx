@@ -1,16 +1,9 @@
 import { css } from "@emotion/css";
-import {
-  Alert,
-  Button,
-  Grid,
-  Pagination,
-  Snackbar,
-  TablePagination,
-  Typography,
-} from "@mui/material";
+import { Grid, Pagination, TablePagination, Typography } from "@mui/material";
 import React, { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card as PokemonCard, getCards } from "../api/api-client";
+import ErrorSnackbar from "../components/error-snackbar/error-snackbar";
 
 type PokemonListProps = {};
 
@@ -23,8 +16,10 @@ const TablePaginationStyle = css`
 const PokemonList: FC<PokemonListProps> = () => {
   // states
   const [cards, setCards] = useState<PokemonCard[]>([]);
-  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
-  const [message, setMessage] = useState("");
+  const [errorSnackbarState, setErrorSnackbarState] = useState({
+    open: false,
+    message: "",
+  });
 
   // pagination logic
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,8 +38,7 @@ const PokemonList: FC<PokemonListProps> = () => {
         setTotalCount(totalCount);
       })
       .catch((error) => {
-        setErrorSnackbarOpen(true);
-        setMessage(error.message);
+        setErrorSnackbarState({ open: true, message: error.message });
       });
   }, [currentPage, pageSize]);
 
@@ -99,7 +93,7 @@ const PokemonList: FC<PokemonListProps> = () => {
           component="div"
           count={totalCount}
           page={currentPage - 1}
-          onPageChange={(e, newPage) => setCurrentPage(newPage)}
+          onPageChange={(e, newPage) => setCurrentPage(newPage + 1)}
           rowsPerPage={pageSize}
           onRowsPerPageChange={(e) => {
             setPageSize(Number(e.target.value));
@@ -108,17 +102,10 @@ const PokemonList: FC<PokemonListProps> = () => {
           className={TablePaginationStyle}
         />
       </Grid>
-      <Snackbar
-        open={errorSnackbarOpen}
-        autoHideDuration={5000}
-        onClose={() => setErrorSnackbarOpen(false)}
-        style={{ width: "100%", justifyContent: "center" }}
-      >
-        <Alert severity="error" style={{ alignItems: "center" }}>
-          {message}
-          <Button onClick={() => setErrorSnackbarOpen(false)}>Close</Button>
-        </Alert>
-      </Snackbar>
+      <ErrorSnackbar
+        open={errorSnackbarState.open}
+        message={errorSnackbarState.message}
+      />
     </Grid>
   );
 };
