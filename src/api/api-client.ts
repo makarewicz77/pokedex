@@ -174,3 +174,11 @@ export const getCards = async (
 
   return { cards, totalCount };
 };
+
+export const getCard = async (cardId: string): Promise<Card> => {
+  const {
+    data: { data: card },
+  } = await pokemonTCGClient.get<{ data: Card }>(`/cards/${cardId}`);
+
+  return card;
+};

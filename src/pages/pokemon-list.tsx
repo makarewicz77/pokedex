@@ -72,7 +72,7 @@ const PokemonList: FC<PokemonListProps> = () => {
                   style={{
                     width: "100%",
                     boxShadow: "4px 4px 8px 0px rgba(0, 0, 0, 0.4)",
-                    borderRadius: "10px",
+                    borderRadius: "24px",
                   }}
                   loading="lazy"
                 />
