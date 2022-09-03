@@ -139,6 +139,14 @@ type Paginated<T> = {
   data: T;
 };
 
+type QueryParams = {
+  q?: string;
+  page: number;
+  pageSize: number;
+  orderBy: string;
+  select?: string[];
+};
+
 const pokemonTCGBaseUrl = "https://api.pokemontcg.io/v2/";
 const headers: AxiosRequestHeaders = { "Content-Type": "application/json" };
 const apiKey = process.env.REACT_APP_POKEMON_TCG_API_KEY;
@@ -152,10 +160,17 @@ const pokemonTCGClient = axios.create({
   headers,
 });
 
-export const getCards = async (): Promise<Card[]> => {
+export const getCards = async (
+  params: QueryParams
+): Promise<{ cards: Card[]; totalCount: number }> => {
   const {
-    data: { data: cards },
-  } = await pokemonTCGClient.get<Paginated<Card[]>>("/cards");
+    data: { data: cards, totalCount },
+  } = await pokemonTCGClient.get<Paginated<Card[]>>("/cards", {
+    params: {
+      ...params,
+      select: params?.select != null ? params?.select.join(",") : "",
+    },
+  });
 
-  return cards;
+  return { cards, totalCount };
 };

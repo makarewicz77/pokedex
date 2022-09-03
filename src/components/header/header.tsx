@@ -16,15 +16,12 @@ interface HeaderProps {}
 
 const PAGES = {
   POKEMON_LIST: "Pokemon List",
-  POKEMON_DETAILS: "Pokemon Details",
 };
 
 const getLinkByPage = (page: string) => {
   switch (page) {
     case PAGES.POKEMON_LIST:
       return "/pokemon-list";
-    case PAGES.POKEMON_DETAILS:
-      return "/pokemon-details";
     default:
       return "/";
   }

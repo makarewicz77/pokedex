@@ -1,34 +1,58 @@
-import { Alert, Grid, Snackbar } from "@mui/material";
+import { css } from "@emotion/css";
+import {
+  Alert,
+  Button,
+  Grid,
+  Pagination,
+  Snackbar,
+  TablePagination,
+} from "@mui/material";
 import React, { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card as PokemonCard, getCards } from "../api/api-client";
 
 type PokemonListProps = {};
 
+const TablePaginationStyle = css`
+  & > div {
+    flex-wrap: wrap;
+  }
+`;
+
 const PokemonList: FC<PokemonListProps> = () => {
+  // states
   const [cards, setCards] = useState<PokemonCard[]>([]);
-  const [open, setOpen] = useState(false);
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = useState(false);
   const [message, setMessage] = useState("");
 
+  // pagination logic
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
   useEffect(() => {
-    getCards()
-      .then((cards) => {
+    getCards({ page: currentPage, pageSize, orderBy: "name" })
+      .then(({ cards, totalCount }) => {
         setCards(cards);
+        setTotalCount(totalCount);
       })
       .catch((error) => {
-        setOpen(true);
+        setErrorSnackbarOpen(true);
         setMessage(error.message);
       });
-  }, []);
+  }, [currentPage, pageSize]);
 
   return (
     <Grid container>
-      <h1>Pokemon List</h1>
+      <Grid container justifyContent="center">
+        <h1>Pokemon List</h1>
+      </Grid>
       <Grid
         container
         spacing={{ xs: 3, md: 4, lg: 5 }}
         columns={{ xs: 4, sm: 8, md: 12, lg: 16, xl: 20 }}
         padding="0 24px"
+        justifyContent="center"
       >
         {cards.map((card) => {
           return (
@@ -49,8 +73,43 @@ const PokemonList: FC<PokemonListProps> = () => {
           );
         })}
       </Grid>
-      <Snackbar open={open} autoHideDuration={6000}>
-        <Alert severity="error">{message}</Alert>
+      <Grid container justifyContent="center" margin="32px 0 24px">
+        <Pagination
+          count={Math.ceil(totalCount / pageSize)}
+          boundaryCount={5}
+          siblingCount={5}
+          page={currentPage}
+          onChange={(e, newPage) => {
+            setCurrentPage(newPage);
+          }}
+          variant="outlined"
+          shape="rounded"
+          hideNextButton
+          hidePrevButton
+        />
+        <TablePagination
+          component="div"
+          count={totalCount}
+          page={cards.length > 0 ? currentPage : 0}
+          onPageChange={(e, newPage) => setCurrentPage(newPage)}
+          rowsPerPage={pageSize}
+          onRowsPerPageChange={(e) => {
+            setPageSize(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className={TablePaginationStyle}
+        />
+      </Grid>
+      <Snackbar
+        open={errorSnackbarOpen}
+        autoHideDuration={5000}
+        onClose={() => setErrorSnackbarOpen(false)}
+        style={{ width: "100%", justifyContent: "center" }}
+      >
+        <Alert severity="error" style={{ alignItems: "center" }}>
+          {message}
+          <Button onClick={() => setErrorSnackbarOpen(false)}>Close</Button>
+        </Alert>
       </Snackbar>
     </Grid>
   );
