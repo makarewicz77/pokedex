@@ -9,8 +9,8 @@ import {
 import { makeStyles } from "@mui/styles";
 import React, { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Card as PokemonCard, getCards } from "../api/api-client";
-import ErrorSnackbar from "../components/error-snackbar/error-snackbar";
+import { Card as PokemonCard, getCards } from "../../api/api-client";
+import ErrorSnackbar from "../../components/error-snackbar/error-snackbar";
 
 type PokemonListProps = {};
 

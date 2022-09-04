@@ -11,14 +11,14 @@ import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
 import React, { FC, useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
-import { Card, getCard } from "../api/api-client";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { Card, getCard } from "../../api/api-client";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   addPokemonToBattle,
   clearError,
   selectBattlePokemons,
-} from "../features/pokemon-battle-cards";
-import ErrorSnackbar from "../components/error-snackbar/error-snackbar";
+} from "../../features/pokemon-battle-cards";
+import ErrorSnackbar from "../../components/error-snackbar/error-snackbar";
 
 /**
  * PokemonDetails component gets the cardId from the url params
