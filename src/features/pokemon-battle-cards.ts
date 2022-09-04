@@ -15,7 +15,6 @@ const initialState: PokemonBattleState = {
 export const pokemonBattleSlice = createSlice({
   name: "pokemonBattle",
   initialState,
-  // The `reducers` field lets us define reducers and generate associated actions
   reducers: {
     addPokemonToBattle: (state, action: PayloadAction<Card>) => {
       if (state.cards.length >= 2) {
@@ -23,6 +22,9 @@ export const pokemonBattleSlice = createSlice({
         return;
       }
       state.cards.push(action.payload);
+    },
+    removePokemonFromBattle: (state, action: PayloadAction<string>) => {
+      state.cards = state.cards.filter((card) => card.id !== action.payload);
     },
     clearBattlePokemons: (state) => {
       state.cards = [];
@@ -33,8 +35,12 @@ export const pokemonBattleSlice = createSlice({
   },
 });
 
-export const { addPokemonToBattle, clearBattlePokemons, clearError } =
-  pokemonBattleSlice.actions;
+export const {
+  addPokemonToBattle,
+  clearBattlePokemons,
+  clearError,
+  removePokemonFromBattle,
+} = pokemonBattleSlice.actions;
 
 export const selectBattlePokemons = (state: RootState) => ({
   battleCards: state.pokemons.cards,

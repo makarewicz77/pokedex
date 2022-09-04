@@ -1,5 +1,6 @@
 import {
   Button,
+  CircularProgress,
   Grid,
   Paper,
   styled,
@@ -14,7 +15,6 @@ import { Card, getCard } from "../api/api-client";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
   addPokemonToBattle,
-  clearBattlePokemons,
   clearError,
   selectBattlePokemons,
 } from "../features/pokemon-battle-cards";
@@ -40,6 +40,7 @@ const PokemonDetails: FC = () => {
   // states
   const { cardId } = useParams();
   const [card, setCard] = useState<Card | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // redux
   const { error } = useAppSelector(selectBattlePokemons);
@@ -77,13 +78,6 @@ const PokemonDetails: FC = () => {
   };
 
   useEffect(() => {
-    return () => {
-      dispatch(clearBattlePokemons());
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     if (cardId != null && cardId.length > 0) {
       getCard(cardId)
         .then((card) => {
@@ -95,24 +89,36 @@ const PokemonDetails: FC = () => {
         })
         .catch((error) => {
           throw error;
-        });
+        })
+        .finally(() => setLoading(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardId]);
 
   if (card == null) {
     return (
-      <Grid container justifyContent="center" marginTop="24px">
-        <Typography variant="h4">Ooops... Something went wrong :(</Typography>
+      <Grid
+        container
+        justifyContent="center"
+        alignItems="center"
+        paddingTop="96px"
+      >
+        {loading ? (
+          <CircularProgress color="inherit" />
+        ) : (
+          <Typography variant="h4">Ooops... Something went wrong :(</Typography>
+        )}
       </Grid>
     );
   }
 
   return (
     <Grid margin="24px">
-      <Typography variant="h3" margin="24px 0">
-        Pokemon Details
-      </Typography>
+      <Grid container justifyContent="center">
+        <Typography variant="h3" margin="24px 0">
+          Pokemon Details
+        </Typography>
+      </Grid>
       <Paper style={{ padding: "24px" }} variant="outlined">
         <form
           onSubmit={handleSubmit(handlePokemonDetailsSave)}

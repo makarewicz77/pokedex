@@ -8,12 +8,35 @@ import {
   Menu,
   MenuItem,
   Button,
+  Grid,
+  styled,
 } from "@mui/material";
 import React, { FC } from "react";
 import { Link } from "react-router-dom";
+import BattleInfo from "../battle-info/battle-info";
 
-interface HeaderProps {}
+const StyledAppBar = styled(AppBar)(() => ({
+  height: "70px",
+}));
 
+const StyledLink = styled(Link)(
+  ({ textColor = "white" }: { textColor?: "white" | "black" }) => ({
+    textDecoration: "none",
+    color: textColor === "white" ? "#fff" : "#000",
+  })
+);
+
+const StyledMainHeaderText = styled(Typography)({
+  fontFamily: "monospace",
+  fontWeight: 700,
+  letterSpacing: ".3rem",
+  color: "inherit",
+  textDecoration: "none",
+});
+
+const StyledPageButton = styled(Button)({ color: "white", display: "block" });
+
+// Object defining pages for future development
 const PAGES = {
   POKEMON_LIST: "Pokemon List",
 };
@@ -27,7 +50,7 @@ const getLinkByPage = (page: string) => {
   }
 };
 
-const Header: FC<HeaderProps> = () => {
+const Header: FC = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -41,109 +64,104 @@ const Header: FC<HeaderProps> = () => {
   };
 
   return (
-    <div>
-      <AppBar position="static">
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            <Link to="/" style={{ textDecoration: "none", color: "white" }}>
-              <Typography
-                variant="h6"
-                noWrap
-                sx={{
-                  mr: 2,
-                  display: { xs: "none", md: "flex" },
-                  fontFamily: "monospace",
-                  fontWeight: 700,
-                  letterSpacing: ".3rem",
-                  color: "inherit",
-                  textDecoration: "none",
-                }}
-              >
-                POKEDEX
-              </Typography>
-            </Link>
-
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleOpenNavMenu}
-                color="inherit"
-              >
-                Menu
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElNav}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                open={Boolean(anchorElNav)}
-                onClose={handleCloseNavMenu}
-                sx={{
-                  display: { xs: "block", md: "none" },
-                }}
-              >
-                {Object.values(PAGES).map((page) => (
-                  <Link
-                    to={getLinkByPage(page)}
-                    key={page}
-                    style={{ textDecoration: "none", color: "black" }}
-                  >
-                    <MenuItem onClick={handleCloseNavMenu}>
-                      <Typography textAlign="center">{page}</Typography>
-                    </MenuItem>
-                  </Link>
-                ))}
-              </Menu>
-            </Box>
-
-            <Link to="/" style={{ textDecoration: "none", color: "white" }}>
-              <Typography
-                variant="h5"
-                noWrap
-                sx={{
-                  mr: 2,
-                  display: { xs: "flex", md: "none" },
-                  flexGrow: 1,
-                  fontFamily: "monospace",
-                  fontWeight: 700,
-                  letterSpacing: ".3rem",
-                  color: "inherit",
-                  textDecoration: "none",
-                }}
-              >
-                POKEDEX
-              </Typography>
-            </Link>
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+    <StyledAppBar position="fixed">
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          {/* HEADER MENU FOR SMALL SCREENS */}
+          <StyledLink to="/">
+            <StyledMainHeaderText
+              variant="h6"
+              noWrap
+              sx={{
+                mr: 2,
+                display: { xs: "none", md: "flex" },
+              }}
+            >
+              POKEDEX
+            </StyledMainHeaderText>
+          </StyledLink>
+          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              size="large"
+              aria-controls="menu-appbar"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              Menu
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{
+                display: { xs: "block", md: "none" },
+              }}
+            >
               {Object.values(PAGES).map((page) => (
-                <Link
+                <StyledLink
                   to={getLinkByPage(page)}
                   key={page}
-                  style={{ textDecoration: "none", color: "white" }}
+                  textColor="black"
                 >
-                  <Button
-                    onClick={handleCloseNavMenu}
-                    sx={{ my: 2, color: "white", display: "block" }}
-                  >
-                    {page}
-                  </Button>
-                </Link>
+                  <MenuItem onClick={handleCloseNavMenu}>
+                    <Typography textAlign="center">{page}</Typography>
+                  </MenuItem>
+                </StyledLink>
               ))}
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
-    </div>
+            </Menu>
+          </Box>
+
+          {/* DEFAULT HEADER */}
+          <StyledLink to="/">
+            <StyledMainHeaderText
+              variant="h5"
+              noWrap
+              sx={{
+                mr: 2,
+                display: { xs: "flex", md: "none" },
+                flexGrow: 1,
+              }}
+            >
+              POKEDEX
+            </StyledMainHeaderText>
+          </StyledLink>
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: { xs: "none", md: "flex" },
+            }}
+          >
+            <Grid container columns={4}>
+              <Grid item xs={1}>
+                {Object.values(PAGES).map((page) => (
+                  <StyledLink to={getLinkByPage(page)} key={page}>
+                    <StyledPageButton
+                      onClick={handleCloseNavMenu}
+                      sx={{ my: 2 }}
+                    >
+                      {page}
+                    </StyledPageButton>
+                  </StyledLink>
+                ))}
+              </Grid>
+              <Grid item display="flex" xs={3}>
+                <BattleInfo />
+              </Grid>
+            </Grid>
+          </Box>
+        </Toolbar>
+      </Container>
+    </StyledAppBar>
   );
 };
 

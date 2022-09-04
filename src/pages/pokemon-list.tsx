@@ -1,5 +1,11 @@
-import { css } from "@emotion/css";
-import { Grid, Pagination, TablePagination, Typography } from "@mui/material";
+import styled from "@emotion/styled";
+import {
+  CircularProgress,
+  Grid,
+  Pagination,
+  TablePagination,
+  Typography,
+} from "@mui/material";
 import React, { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card as PokemonCard, getCards } from "../api/api-client";
@@ -7,11 +13,11 @@ import ErrorSnackbar from "../components/error-snackbar/error-snackbar";
 
 type PokemonListProps = {};
 
-const TablePaginationStyle = css`
-  & > div {
-    flex-wrap: wrap;
-  }
-`;
+const StyledTablePagination = styled(TablePagination)({
+  "& > div": {
+    flexWrap: "wrap",
+  },
+});
 
 const PokemonList: FC<PokemonListProps> = () => {
   // states
@@ -20,6 +26,7 @@ const PokemonList: FC<PokemonListProps> = () => {
     open: false,
     message: "",
   });
+  const [loading, setLoading] = useState(true);
 
   // pagination logic
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,10 +46,20 @@ const PokemonList: FC<PokemonListProps> = () => {
       })
       .catch((error) => {
         setErrorSnackbarState({ open: true, message: error.message });
-      });
+      })
+      .finally(() => setLoading(false));
   }, [currentPage, pageSize]);
 
-  return (
+  return loading ? (
+    <Grid
+      container
+      justifyContent="center"
+      alignItems="center"
+      paddingTop="96px"
+    >
+      <CircularProgress color="inherit" />
+    </Grid>
+  ) : (
     <Grid container>
       <Grid container justifyContent="center">
         <Typography variant="h3" margin="24px 0">
@@ -89,8 +106,7 @@ const PokemonList: FC<PokemonListProps> = () => {
           hideNextButton
           hidePrevButton
         />
-        <TablePagination
-          component="div"
+        <StyledTablePagination
           count={totalCount}
           page={currentPage - 1}
           onPageChange={(e, newPage) => setCurrentPage(newPage + 1)}
@@ -99,7 +115,6 @@ const PokemonList: FC<PokemonListProps> = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className={TablePaginationStyle}
         />
       </Grid>
       <ErrorSnackbar
