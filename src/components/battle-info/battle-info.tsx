@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { Badge, Button, Grid, Modal, Typography } from "@mui/material";
-import React, { FC, ReactNode, useEffect, useState } from "react";
+import React, { FC, ReactNode, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   removePokemonFromBattle,
