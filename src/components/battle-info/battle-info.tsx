@@ -1,12 +1,17 @@
 import styled from "@emotion/styled";
-import { Button, Grid, Modal, Typography } from "@mui/material";
-import React, { FC, ReactNode, useState } from "react";
+import { Badge, Button, Grid, Modal, Typography } from "@mui/material";
+import React, { FC, ReactNode, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   removePokemonFromBattle,
   selectBattlePokemons,
 } from "../../features/pokemon-battle-cards";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+
+type BattleInfoProps = {
+  mode?: "small" | "large";
+};
 
 const Space = styled(Grid)(() => ({
   margin: "0 24px 0",
@@ -91,18 +96,26 @@ const StyledBattleResultContainer = styled(Grid)(() => ({
   marginBottom: "12px",
 }));
 
-const StyledBattleWonContainer = styled(Grid)(() => ({
+const StyledHeaderItemContainer = styled(Grid)(() => ({
   display: "flex",
   justifyContent: "center",
 }));
 
-const BattleInfo: FC = () => {
+const BattleInfo: FC<BattleInfoProps> = ({ mode = "large" }) => {
   // states
   const [battleModalOpen, setBattleModalOpen] = useState(false);
 
   // redux
   const { battleCards } = useAppSelector(selectBattlePokemons);
   const dispatch = useAppDispatch();
+
+  const handleDeletePokemonClick = (id: string) => {
+    if (battleCards.length <= 1) {
+      setBattleModalOpen(false);
+    }
+
+    dispatch(removePokemonFromBattle(id));
+  };
 
   const renderBattleVersus = (): ReactNode => {
     const onCardDelete = (id: string) => {
@@ -165,138 +178,216 @@ const BattleInfo: FC = () => {
       if (diff1 < diff2) {
         return (
           <>
-            <StyledBattleWonContainer item xs={1} />
-            <StyledBattleWonContainer item xs={1}>
+            <StyledHeaderItemContainer item xs={1} />
+            <StyledHeaderItemContainer item xs={1}>
               <Typography>WIN</Typography>
-            </StyledBattleWonContainer>
+            </StyledHeaderItemContainer>
           </>
         );
       } else if (diff2 < diff1) {
         return (
           <>
-            <StyledBattleWonContainer item xs={1}>
+            <StyledHeaderItemContainer item xs={1}>
               <Typography>WIN</Typography>
-            </StyledBattleWonContainer>
-            <StyledBattleWonContainer item xs={1} />
+            </StyledHeaderItemContainer>
+            <StyledHeaderItemContainer item xs={1} />
           </>
         );
       } else {
         return (
-          <StyledBattleWonContainer item xs={2}>
+          <StyledHeaderItemContainer item xs={2}>
             <Typography>DRAW</Typography>
-          </StyledBattleWonContainer>
+          </StyledHeaderItemContainer>
         );
       }
     }
     return <></>;
   };
 
-  return battleCards.length > 0 ? (
-    <StyledBattleInfoContainer container>
-      {renderBattleVersus()}
+  const renderDeleteIcons = (): ReactNode => (
+    <>
+      <StyledHeaderItemContainer item xs={1}>
+        {battleCards[0] != null && (
+          <DeleteOutlineIcon
+            onClick={() => {
+              handleDeletePokemonClick(battleCards[0].id);
+            }}
+            color="error"
+          />
+        )}
+      </StyledHeaderItemContainer>
+      <StyledHeaderItemContainer item xs={1}>
+        {battleCards[1] != null && (
+          <DeleteOutlineIcon
+            onClick={() => {
+              handleDeletePokemonClick(battleCards[1].id);
+            }}
+            color="error"
+          />
+        )}
+      </StyledHeaderItemContainer>
+    </>
+  );
+
+  const renderModal = (): ReactNode => (
+    <Modal open={battleModalOpen} onClose={() => setBattleModalOpen(false)}>
+      <StyledModalContainer width={{ xs: "90%", sm: "70%", md: "50%" }}>
+        <StyledBattleResultContainer container columns={2}>
+          {battleCards.length >= 2 && renderBattleResult()}
+          {mode === "small" && renderDeleteIcons()}
+        </StyledBattleResultContainer>
+        <Grid container columns={15}>
+          {battleCards[0] != null ? (
+            <StyledBattleCardContainer item xs={7}>
+              <StyledImage
+                src={`${battleCards[0].images.small}?wfit=crop&auto=format`}
+                alt={battleCards[0].name}
+                loading="lazy"
+              />
+
+              <StyledBattleCardStatisticContainer>
+                {/* display hp */}
+                <StyledBattleCardDetailsContainer container columns={2}>
+                  <StyledBattleCardDetailsLabelContainer item xs={1}>
+                    <Typography variant="h6">HP:</Typography>
+                  </StyledBattleCardDetailsLabelContainer>
+                  <StyledBattleCardDetailsValueContainer item xs={1}>
+                    <StyledBattleCardValueText variant="h6">
+                      {battleCards[0].hp}
+                    </StyledBattleCardValueText>
+                  </StyledBattleCardDetailsValueContainer>
+                </StyledBattleCardDetailsContainer>
+
+                {/* display damage */}
+                <StyledBattleCardDetailsContainer container columns={2}>
+                  <StyledBattleCardDetailsLabelContainer item xs={1}>
+                    <Typography variant="h6">Summary damage:</Typography>
+                  </StyledBattleCardDetailsLabelContainer>
+                  <StyledBattleCardDetailsValueContainer item xs={1}>
+                    <StyledBattleCardValueText variant="h6">
+                      {battleCards[0].attacks?.reduce((acc, curr) => {
+                        if (!isNaN(parseInt(curr.damage))) {
+                          acc += parseInt(curr.damage);
+                        }
+                        return acc;
+                      }, 0)}
+                    </StyledBattleCardValueText>
+                  </StyledBattleCardDetailsValueContainer>
+                </StyledBattleCardDetailsContainer>
+              </StyledBattleCardStatisticContainer>
+            </StyledBattleCardContainer>
+          ) : (
+            <Grid
+              item
+              xs={7}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Typography variant="h4">???</Typography>
+            </Grid>
+          )}
+          <Grid item xs={1} />
+          {battleCards[1] != null ? (
+            <StyledBattleCardContainer item xs={7}>
+              <StyledImage
+                src={`${battleCards[1]?.images.small}?wfit=crop&auto=format`}
+                alt={battleCards[1].name}
+                loading="lazy"
+              />
+
+              <StyledBattleCardStatisticContainer>
+                {/* display hp */}
+                <StyledBattleCardDetailsContainer container columns={2}>
+                  <StyledBattleCardDetailsLabelContainer item xs={1}>
+                    <Typography variant="h6">HP:</Typography>
+                  </StyledBattleCardDetailsLabelContainer>
+                  <StyledBattleCardDetailsValueContainer item xs={1}>
+                    <StyledBattleCardValueText variant="h6">
+                      {battleCards[1].hp}
+                    </StyledBattleCardValueText>
+                  </StyledBattleCardDetailsValueContainer>
+                </StyledBattleCardDetailsContainer>
+
+                {/* display damage */}
+                <StyledBattleCardDetailsContainer container columns={2}>
+                  <StyledBattleCardDetailsLabelContainer item xs={1}>
+                    <Typography variant="h6">Summary damage:</Typography>
+                  </StyledBattleCardDetailsLabelContainer>
+                  <StyledBattleCardDetailsValueContainer item xs={1}>
+                    <StyledBattleCardValueText variant="h6">
+                      {battleCards[1].attacks?.reduce((acc, curr) => {
+                        if (!isNaN(parseInt(curr.damage))) {
+                          acc += parseInt(curr.damage);
+                        }
+                        return acc;
+                      }, 0)}
+                    </StyledBattleCardValueText>
+                  </StyledBattleCardDetailsValueContainer>
+                </StyledBattleCardDetailsContainer>
+              </StyledBattleCardStatisticContainer>
+            </StyledBattleCardContainer>
+          ) : (
+            <Grid
+              item
+              xs={7}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <Typography variant="h4">???</Typography>
+            </Grid>
+          )}
+        </Grid>
+      </StyledModalContainer>
+    </Modal>
+  );
+
+  if (battleCards.length <= 0) {
+    return null;
+  }
+
+  return (
+    <StyledBattleInfoContainer container justifyContent="center">
+      {mode === "large" && renderBattleVersus()}
       <Space />
-      {battleCards.length >= 2 && (
+      {(battleCards.length >= 2 || mode === "small") && (
         <>
-          <Button
-            variant={"outlined"}
-            color="inherit"
-            onClick={() => setBattleModalOpen(true)}
-          >
-            <Typography variant="body1">Battle!</Typography>
-          </Button>
-          <Modal
-            open={battleModalOpen}
-            onClose={() => setBattleModalOpen(false)}
-          >
-            <StyledModalContainer width={{ xs: "90%", sm: "70%", md: "50%" }}>
-              <StyledBattleResultContainer container columns={2}>
-                {battleCards.length >= 2 && renderBattleResult()}
-              </StyledBattleResultContainer>
-              <Grid container columns={15}>
-                <StyledBattleCardContainer item xs={7}>
-                  <StyledImage
-                    src={`${battleCards[0].images.small}?wfit=crop&auto=format`}
-                    alt={battleCards[0].name}
-                    loading="lazy"
-                  />
-
-                  <StyledBattleCardStatisticContainer>
-                    {/* display hp */}
-                    <StyledBattleCardDetailsContainer container columns={2}>
-                      <StyledBattleCardDetailsLabelContainer item xs={1}>
-                        <Typography variant="h6">HP:</Typography>
-                      </StyledBattleCardDetailsLabelContainer>
-                      <StyledBattleCardDetailsValueContainer item xs={1}>
-                        <StyledBattleCardValueText variant="h6">
-                          {battleCards[0].hp}
-                        </StyledBattleCardValueText>
-                      </StyledBattleCardDetailsValueContainer>
-                    </StyledBattleCardDetailsContainer>
-
-                    {/* display damage */}
-                    <StyledBattleCardDetailsContainer container columns={2}>
-                      <StyledBattleCardDetailsLabelContainer item xs={1}>
-                        <Typography variant="h6">Summary damage:</Typography>
-                      </StyledBattleCardDetailsLabelContainer>
-                      <StyledBattleCardDetailsValueContainer item xs={1}>
-                        <StyledBattleCardValueText variant="h6">
-                          {battleCards[0].attacks?.reduce((acc, curr) => {
-                            if (!isNaN(parseInt(curr.damage))) {
-                              acc += parseInt(curr.damage);
-                            }
-                            return acc;
-                          }, 0)}
-                        </StyledBattleCardValueText>
-                      </StyledBattleCardDetailsValueContainer>
-                    </StyledBattleCardDetailsContainer>
-                  </StyledBattleCardStatisticContainer>
-                </StyledBattleCardContainer>
-                <Grid item xs={1} />
-                <StyledBattleCardContainer item xs={7}>
-                  <StyledImage
-                    src={`${battleCards[1]?.images.small}?wfit=crop&auto=format`}
-                    alt={battleCards[1].name}
-                    loading="lazy"
-                  />
-
-                  <StyledBattleCardStatisticContainer>
-                    {/* display hp */}
-                    <StyledBattleCardDetailsContainer container columns={2}>
-                      <StyledBattleCardDetailsLabelContainer item xs={1}>
-                        <Typography variant="h6">HP:</Typography>
-                      </StyledBattleCardDetailsLabelContainer>
-                      <StyledBattleCardDetailsValueContainer item xs={1}>
-                        <StyledBattleCardValueText variant="h6">
-                          {battleCards[1].hp}
-                        </StyledBattleCardValueText>
-                      </StyledBattleCardDetailsValueContainer>
-                    </StyledBattleCardDetailsContainer>
-
-                    {/* display damage */}
-                    <StyledBattleCardDetailsContainer container columns={2}>
-                      <StyledBattleCardDetailsLabelContainer item xs={1}>
-                        <Typography variant="h6">Summary damage:</Typography>
-                      </StyledBattleCardDetailsLabelContainer>
-                      <StyledBattleCardDetailsValueContainer item xs={1}>
-                        <StyledBattleCardValueText variant="h6">
-                          {battleCards[1].attacks?.reduce((acc, curr) => {
-                            if (!isNaN(parseInt(curr.damage))) {
-                              acc += parseInt(curr.damage);
-                            }
-                            return acc;
-                          }, 0)}
-                        </StyledBattleCardValueText>
-                      </StyledBattleCardDetailsValueContainer>
-                    </StyledBattleCardDetailsContainer>
-                  </StyledBattleCardStatisticContainer>
-                </StyledBattleCardContainer>
-              </Grid>
-            </StyledModalContainer>
-          </Modal>
+          {mode === "small" ? (
+            <Badge
+              badgeContent={
+                battleCards.length < 2 ? battleCards.length : "Fight!"
+              }
+              color="warning"
+            >
+              <Button
+                variant={"outlined"}
+                color="inherit"
+                onClick={() => {
+                  console.log("SMALL");
+                  setBattleModalOpen(true);
+                }}
+              >
+                <Typography variant="body1">Battle!</Typography>
+              </Button>
+            </Badge>
+          ) : (
+            <Button
+              variant={"outlined"}
+              color="inherit"
+              onClick={() => {
+                console.log("LARGE");
+                setBattleModalOpen(true);
+              }}
+            >
+              <Typography variant="body1">Battle!</Typography>
+            </Button>
+          )}
         </>
       )}
+      {renderModal()}
     </StyledBattleInfoContainer>
-  ) : null;
-};;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  );
+};
 
 export default BattleInfo;

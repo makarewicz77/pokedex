@@ -24,7 +24,8 @@ export const pokemonBattleSlice = createSlice({
       state.cards.push(action.payload);
     },
     removePokemonFromBattle: (state, action: PayloadAction<string>) => {
-      state.cards = state.cards.filter((card) => card.id !== action.payload);
+      const index = state.cards.findIndex((card) => card.id === action.payload);
+      state.cards.splice(index, 1);
     },
     clearBattlePokemons: (state) => {
       state.cards = [];

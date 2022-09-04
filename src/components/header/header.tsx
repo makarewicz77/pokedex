@@ -119,6 +119,9 @@ const Header: FC = () => {
                 </StyledLink>
               ))}
             </Menu>
+            <Grid container>
+              <BattleInfo mode="small" />
+            </Grid>
           </Box>
 
           {/* DEFAULT HEADER */}
