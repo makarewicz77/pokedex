@@ -20,9 +20,9 @@ const StyledAppBar = styled(AppBar)(() => ({
 }));
 
 const StyledLink = styled(Link)(
-  ({ textColor = "white" }: { textColor?: "white" | "black" }) => ({
+  ({ textcolor = "white" }: { textcolor?: "white" | "black" }) => ({
     textDecoration: "none",
-    color: textColor === "white" ? "#fff" : "#000",
+    color: textcolor === "white" ? "#fff" : "#000",
   })
 );
 
@@ -111,7 +111,7 @@ const Header: FC = () => {
                 <StyledLink
                   to={getLinkByPage(page)}
                   key={page}
-                  textColor="black"
+                  textcolor="black"
                 >
                   <MenuItem onClick={handleCloseNavMenu}>
                     <Typography textAlign="center">{page}</Typography>

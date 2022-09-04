@@ -6,6 +6,7 @@ import {
   TablePagination,
   Typography,
 } from "@mui/material";
+import { makeStyles } from "@mui/styles";
 import React, { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card as PokemonCard, getCards } from "../api/api-client";
@@ -13,10 +14,18 @@ import ErrorSnackbar from "../components/error-snackbar/error-snackbar";
 
 type PokemonListProps = {};
 
-const StyledTablePagination = styled(TablePagination)({
-  "& > div": {
-    flexWrap: "wrap",
+const useStyles = makeStyles({
+  tablePaginationStyle: {
+    "& > div": {
+      flexWrap: "wrap",
+    },
   },
+});
+
+const StyledImage = styled("img")({
+  width: "100%",
+  boxShadow: "4px 4px 8px 0px rgba(0, 0, 0, 0.4)",
+  borderRadius: "24px",
 });
 
 const PokemonList: FC<PokemonListProps> = () => {
@@ -27,6 +36,7 @@ const PokemonList: FC<PokemonListProps> = () => {
     message: "",
   });
   const [loading, setLoading] = useState(true);
+  const classes = useStyles();
 
   // pagination logic
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,14 +87,9 @@ const PokemonList: FC<PokemonListProps> = () => {
           return (
             <Grid item xs={4} sm={4} md={4} lg={4} xl={4} key={card.id}>
               <Link to={`/pokemon-details/${card.id}`}>
-                <img
+                <StyledImage
                   src={`${card.images.small}?wfit=crop&auto=format`}
                   alt={card.name}
-                  style={{
-                    width: "100%",
-                    boxShadow: "4px 4px 8px 0px rgba(0, 0, 0, 0.4)",
-                    borderRadius: "24px",
-                  }}
                   loading="lazy"
                 />
               </Link>
@@ -106,7 +111,8 @@ const PokemonList: FC<PokemonListProps> = () => {
           hideNextButton
           hidePrevButton
         />
-        <StyledTablePagination
+        <TablePagination
+          component="div"
           count={totalCount}
           page={currentPage - 1}
           onPageChange={(e, newPage) => setCurrentPage(newPage + 1)}
@@ -115,6 +121,7 @@ const PokemonList: FC<PokemonListProps> = () => {
             setPageSize(Number(e.target.value));
             setCurrentPage(1);
           }}
+          classes={{ root: classes.tablePaginationStyle }}
         />
       </Grid>
       <ErrorSnackbar
