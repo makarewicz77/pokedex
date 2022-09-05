@@ -12,7 +12,10 @@ import { Link } from "react-router-dom";
 import { Card as PokemonCard, getCards } from "../../api/api-client";
 import ErrorSnackbar from "../../components/error-snackbar/error-snackbar";
 
-type PokemonListProps = {};
+/**
+ * PokemonList component returns a list of pokemons with pagination.
+ * It also allows a user to click the pokemon card to view it's details.
+ */
 
 const useStyles = makeStyles({
   tablePaginationStyle: {
@@ -28,7 +31,7 @@ const StyledImage = styled("img")({
   borderRadius: "24px",
 });
 
-const PokemonList: FC<PokemonListProps> = () => {
+const PokemonList: FC = () => {
   // states
   const [cards, setCards] = useState<PokemonCard[]>([]);
   const [errorSnackbarState, setErrorSnackbarState] = useState({
@@ -48,6 +51,7 @@ const PokemonList: FC<PokemonListProps> = () => {
       page: currentPage,
       pageSize,
       orderBy: "name",
+      // Query to filter only pokemons
       q: "supertype:Pokémon",
     })
       .then(({ cards, totalCount }) => {
